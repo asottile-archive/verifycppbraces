@@ -91,7 +91,12 @@ class TestArrayInit(unittest.TestCase, TestFile):
     filename = 'array_init.cpp'
 
     def assert_braces_correct(self, braces):
-        self.assertEqual(len(braces), 2)
+        self.assertEqual(
+            len(
+                [b for b in braces if b.start_brace.brace_type == EGYPTIAN]
+            ),
+            3
+        )
 
 if __name__ == '__main__':
     unittest.main()
