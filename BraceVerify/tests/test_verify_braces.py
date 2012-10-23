@@ -74,5 +74,18 @@ class TestMixed(unittest.TestCase, TestFile):
         for brace in braces:
             self.assertEqual(brace.start_brace.index, brace.end_index)
 
+class TestLinesAndCols(unittest.TestCase, TestFile):
+    filename = 'egyptian.cpp'
+
+    def assert_braces_correct(self, braces):
+        self.assertEqual(braces[0].start_brace.line_number, 7)
+        self.assertEqual(braces[0].end_line_number, 9)
+        self.assertEqual(braces[0].start_brace.index, 4)
+        self.assertEqual(braces[0].end_index, 4)
+        self.assertEqual(braces[1].start_brace.line_number, 5)
+        self.assertEqual(braces[1].end_line_number, 12)
+        self.assertEqual(braces[1].start_brace.index, 0)
+        self.assertEqual(braces[1].end_index, 0)
+
 if __name__ == '__main__':
     unittest.main()

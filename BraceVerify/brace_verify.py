@@ -99,7 +99,7 @@ def get_brace_matching(file):
             parse_line(line, line_number, index + 1)
 
     for i, line in enumerate(without_comments):
-        parse_line(line, i)
+        parse_line(line, i + 1)
 
     return manager.brace_pairs
 
