@@ -1,5 +1,6 @@
 import re
 import string
+import sys
 
 from optparse import OptionParser
 
@@ -150,6 +151,9 @@ if __name__ == '__main__':
     if len(args) != 1:
         print 'Needs a file!'
     else:
-        file = open(args[0])
+        if args[0] == '-':
+          file = sys.stdin
+        else:
+          file = open(args[0])
         validate_brace_pairs(get_brace_matching(file))
         
