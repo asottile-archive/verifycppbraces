@@ -123,8 +123,6 @@ def get_brace_matching(file):
 
 def validate_brace_pairs(brace_pairs):
 
-    import ipdb; ipdb.set_trace()
-
     brace_counts = {
         EGYPTIAN: 0,
         BLOCK: 0,
