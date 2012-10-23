@@ -49,7 +49,7 @@ def get_brace_matching(file):
 
     # Remove character literals
     without_chars = (
-        re.sub("'\\?[^']'", '', s) for s in eol_stripped
+        re.sub("'\\\\?[^']'", '', s) for s in eol_stripped
     )
     
     # Remove string literals
