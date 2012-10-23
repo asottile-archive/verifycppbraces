@@ -10,6 +10,8 @@ EGYPTIAN = 'EGYPTIAN'
 BLOCK = 'BLOCK'
 UNKNOWN = 'UNKNOWN'
 
+INDENT = re.compile('^[ ]*')
+
 class StartBrace:
     def __init__(self, brace_type, line_number, index):
         self.brace_type = brace_type
@@ -63,7 +65,11 @@ def get_brace_matching(file):
     manager = Manager()
 
     def parse_line(line, line_number, start_index=0):
-        line_to_parse = line[start_index::]
+        if start_index >= len(line):
+            return
+
+        # rstrip for lines like if (herp) { // blah
+        line_to_parse = string.rstrip(line[start_index::])
         if manager.in_comment and '*/' in line_to_parse:
             manager.in_comment = False
             end_pos = line_to_parse.find('*/') + start_index + 2
@@ -77,29 +83,65 @@ def get_brace_matching(file):
             parse_line(line, line_number, index_of_start)
         elif not manager.in_comment and '{' in line_to_parse:
             index_in_line = line_to_parse.find('{') + start_index
-            indent = len(re.match('^[ ]*', line).group())
+            indent = len(INDENT.match(line).group())
             if index_in_line == indent:
                 manager.stack.append(StartBrace(BLOCK, line_number, indent))
-                if index_in_line + 1 != len(line):
-                    parse_line(line, line_number, index_in_line + 1)
+                parse_line(line, line_number, index_in_line + 1)
             elif index_in_line + 1 == len(line):
                 manager.stack.append(StartBrace(EGYPTIAN, line_number, indent))
             else:
                 manager.stack.append(StartBrace(UNKNOWN, line_number, index_in_line))
-                if index_in_line + 1 != len(line):
-                    parse_line(line, line_number, index_in_line + 1)
+                parse_line(line, line_number, index_in_line + 1)
         elif not manager.in_comment and '}' in line_to_parse:
             index = line_to_parse.find('}') + start_index
             start = manager.stack.pop()
             manager.brace_pairs.append(BracePair(start, line_number, index))
-            if index + 1 != len(line):
-                parse_line(line, line_number, index + 1)
+            parse_line(line, line_number, index + 1)
 
     for i, line in enumerate(without_comments):
         parse_line(line, i)
 
-    import ipdb; ipdb.set_trace()
+    return manager.brace_pairs
 
+def validate_brace_pairs(brace_pairs):
+
+    brace_counts = {
+        EGYPTIAN: 0,
+        BLOCK: 0,
+        UNKNOWN: 0
+    }
+
+    for brace_pair in brace_pairs:
+        brace_counts[brace_pair.start_brace.brace_type] += 1
+
+        if brace_pair.start_brace.brace_type == UNKNOWN:
+            for line_number in [brace_pair.start_brace.line_number, brace_pair.end_line_number]:
+                print '%s:%s: %s [%s] [%d]' % (
+                    'upload.cpp',
+                    line_number,
+                    'Unknown brace type (probably bad brace)',
+                    'Braces',
+                    100
+                )
+
+        if brace_pair.start_brace.index != brace_pair.end_index:
+            for line_number in [brace_pair.start_brace.line_number, brace_pair.end_line_number]:
+                print '%s:%s: %s [%s] [%d]' % (
+                    'upload.cpp',
+                    line_number,
+                    'Mismatched brace index -- start %s end %s' % (brace_pair.start_brace.index, brace_pair.end_index),
+                    'Braces',
+                    100
+                )
+
+    if bool(brace_counts[EGYPTIAN]) == bool(brace_counts[BLOCK]):
+        print '%s:%s: %s [%s] [%d]' % (
+            'upload.cpp',
+            0,
+            'Inconsistent braces in file.  %s egyptian, %s block' % (brace_counts[EGYPTIAN], brace_counts[BLOCK]),
+            'Braces',
+            100
+        )
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -109,5 +151,5 @@ if __name__ == '__main__':
         print 'Needs a file!'
     else:
         file = open(args[0])
-        get_brace_matching(file)
+        validate_brace_pairs(get_brace_matching(file))
         
