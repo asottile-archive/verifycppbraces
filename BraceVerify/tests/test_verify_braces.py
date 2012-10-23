@@ -87,5 +87,11 @@ class TestLinesAndCols(unittest.TestCase, TestFile):
         self.assertEqual(braces[1].start_brace.index, 0)
         self.assertEqual(braces[1].end_index, 0)
 
+class TestArrayInit(unittest.TestCase, TestFile):
+    filename = 'array_init.cpp'
+
+    def assert_braces_correct(self, braces):
+        self.assertEqual(len(braces), 2)
+
 if __name__ == '__main__':
     unittest.main()
