@@ -43,15 +43,11 @@ def get_brace_matching(file):
         string.replace(s, '\t', ' ' * SPACES_PER_TAB) for s in file
     )
 
-    eol_stripped = (
-        string.rstrip(s) for s in tabs_adjusted
-    )
-
     # XXX: I am pretty sure these removals are not quite correct
 
     # Remove character literals
     without_chars = (
-        re.sub("'\\\\?[^']'", '', s) for s in eol_stripped
+        re.sub("'\\\\?[^']'", '', s) for s in tabs_adjusted
     )
     
     # Remove string literals
@@ -61,7 +57,7 @@ def get_brace_matching(file):
 
     # Remove one line comments
     without_comments = (
-        re.sub('//.*$', '', s) for s in without_strings
+        string.rstrip(re.sub('//.*$', '', s)) for s in without_strings
     )
 
     manager = Manager()

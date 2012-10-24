@@ -65,6 +65,9 @@ class TestEgyptian(unittest.TestCase, TestFile):
             self.assertEqual(brace.start_brace.index, brace.end_index)
             self.assertEqual(brace.start_brace.brace_type, EGYPTIAN)
 
+class TestComment(TestEgyptian):
+    filename='egyptian_obscured_comment.cpp'
+
 class TestMixed(unittest.TestCase, TestFile):
     filename = 'mixed.cpp'
 
